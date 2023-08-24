@@ -4,7 +4,7 @@ const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        require: true
+        required: true
     },
     products: [
         {
@@ -42,7 +42,7 @@ const orderSchema = new mongoose.Schema({
         },
         houseNo: {
             type: String,
-            required: trusted,
+            required: true,
         },
         street: {
             type: String,

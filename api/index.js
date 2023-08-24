@@ -25,9 +25,22 @@ mongoose
   .catch((err) => {
     console.log("Error connecting to MonggoDb", err);
   });
+//192.168.1.9
 
-app.listen(port, () => {
-  console.log("Server is running on port 8000");
+// mongoose
+//   .connect("mongodb://127.0.0.1/ecommerce-project", {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => {
+//     console.log("Connected to Mongo Db");
+//   })
+//   .catch((err) => {
+//     console.log("Error connecting to MongoDb", err);
+//   });
+
+app.listen(port,() => {
+  console.log("Server is running on port  ");
 });
 
 const User = require("./models/user");
@@ -39,10 +52,11 @@ const sendVerificationEmail = async (email, verificationToken) => {
 
   const transporter = nodemailer.createTransport({
     // configure the email service
-    service: "gmail.com",
+    service: "gmail",
     auth: {
-      user: "dangkhoa3348@gmai.com",
+      user: "dangkhoa3348@gmail.com",
       pass: "hvejqjqwjqdgnqdx",
+      //hvejqjqwjqdgnqdx
     },
   });
   //compose the email message
@@ -50,7 +64,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
     from: "amazon.com",
     to: email,
     subject: "Email Verification",
-    text: "Please click the following link to verify your email : http://localhost:8000/verify/${verificationToken}",
+    text:  `Please click the following link to verify your email: http://192.168.1.9:8000/verify/${verificationToken}`,
   };
 
   //send the email
@@ -62,7 +76,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
 };
 
 //endpoint to register in the app
-app.port("/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -76,15 +90,19 @@ app.port("/register", async (req, res) => {
     const newUser = new User({ name, email, password });
 
     //generate and store the verification token
-    newUser.verificationToken = crypto.randomBytes(20).toString("hex");
+
+   // newUser.verificationToken = crypto.randomBytes(20).toString("hex");
 
     //save the user to the database
+
     await newUser.save();
 
     //save verification email to the user
-    sendVerificationEmail(newUser.email, newUser.verificationToken);
+    //sendVerificationEmail(newUser.email, newUser.verificationToken);
+    res.status(200).json({ message: "Register successfull kkkk" });
+
   } catch (error) {
-    console.log("error registering user", error);
+    console.log("error registering user2", error);
     res.status(500).json({ message: "Registration failed" });
   }
 });
@@ -109,5 +127,39 @@ app.get("/verify/:token", async (req, res) => {
     res.status(500).json({
       message: "Email Verificationon Failed",
     });
+  }
+});
+
+const generateSecretKey = () =>{
+  const secretKey = crypto.randomBytes(32).toString("hex")
+  return secretKey;
+}
+const secretKey = generateSecretKey();
+//endpoint to login the user!
+
+app.post("/login", async(req,res)=>{
+
+  try{
+
+    const{email,password} = req.body;
+    //check if the user exists
+    const user = await User.findOne({email});
+    if(!user){
+      return res.status(401).json({message:"Invalid email or passwordd"});
+
+    }
+
+    //check if the password is correct
+    if(user.password !== password){
+      return res.status(401).json({message:"Invalid password"});
+    }
+
+    //generatee a token
+    const token = jwt.sign({userId:user._id}, secretKey);
+
+     res.status(200).json({token});
+
+  }catch(error){
+    res.status(500).json({message:"Login Failed"})
   }
 });

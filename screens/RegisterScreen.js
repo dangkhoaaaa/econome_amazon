@@ -25,7 +25,7 @@ const RegisterScreen = () => {
             setEmail("");
         }).catch((error)=>{
             Alert.alert("Registeration Error","an error occurredd during registration");
-            console.log("registration failed", error);
+            console.log("registration failed1", error);
         })
 
     };
